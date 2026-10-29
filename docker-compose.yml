@@ -2,9 +2,9 @@
 # (automatic Let's Encrypt HTTPS) or a Cloudflare Tunnel, plus an optional
 # self-hosted RustDesk ID/relay server.
 #
-#   cp .env.example .env   # set RMM_DOMAIN, passwords, RMM_UPDATE_PUBKEY,
-#                          # and COMPOSE_PROFILES (which optional services run)
-#   docker compose up -d
+#   cp sample.env .env     # set RMM_DOMAIN, passwords and COMPOSE_PROFILES
+#                          # (which optional services run); see README.md
+#   docker compose pull && docker compose up -d
 #
 # Profiles (COMPOSE_PROFILES in .env):
 #   caddy     HTTPS on this host's ports 80/443 with Let's Encrypt
@@ -28,12 +28,9 @@ services:
       retries: 5
 
   rustyrmm:
-    # Published image by default; `docker compose up -d --build` builds from
-    # this checkout instead (set RMM_IMAGE=rustyrmm:local for that, so a
-    # later `pull` doesn't replace the local build).
+    # Published image; set RMM_IMAGE in .env to pin a version, e.g.
+    # smugzombie/rustyrmm:0.9.1.
     image: ${RMM_IMAGE:-smugzombie/rustyrmm:latest}
-    build:
-      context: ..
     restart: unless-stopped
     depends_on:
       postgres:
@@ -74,7 +71,8 @@ services:
 
   # Cloudflare Tunnel: outbound-only connection to Cloudflare, which serves
   # https://RMM_DOMAIN with its own certificate. Route the public hostname to
-  # http://rustyrmm:8080 in the Cloudflare dashboard (see docs-site/docs/deployment/cloudflare-tunnel.md).
+  # http://rustyrmm:8080 in the Cloudflare dashboard (see README.md, and
+  # /docs/deployment/cloudflare-tunnel on your server for details).
   cloudflared:
     image: cloudflare/cloudflared:2026.9.3
     profiles: [tunnel]

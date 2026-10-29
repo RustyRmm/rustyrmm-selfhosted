@@ -1,0 +1,4 @@
+{$RMM_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy rustyrmm:8080
+}
