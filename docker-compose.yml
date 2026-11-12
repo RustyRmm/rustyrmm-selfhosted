@@ -1,6 +1,7 @@
 # Production stack: RustyRMM + Postgres, published either by Caddy
-# (automatic Let's Encrypt HTTPS) or a Cloudflare Tunnel, plus an optional
-# self-hosted RustDesk ID/relay server.
+# (automatic Let's Encrypt HTTPS) or a Cloudflare Tunnel. Remote desktop is
+# built into RustyRMM; a self-hosted RustDesk ID/relay server is an optional
+# add-on.
 #
 #   cp sample.env .env     # set RMM_DOMAIN, passwords and COMPOSE_PROFILES
 #                          # (which optional services run); see README.md
@@ -9,7 +10,8 @@
 # Profiles (COMPOSE_PROFILES in .env):
 #   caddy     HTTPS on this host's ports 80/443 with Let's Encrypt
 #   tunnel    Cloudflare Tunnel (no inbound ports; set CLOUDFLARE_TUNNEL_TOKEN)
-#   rustdesk  bundled RustDesk server (needs TCP 21115-21117 + UDP 21116 reachable)
+#   rustdesk  optional RustDesk add-on server (needs TCP 21115-21117 + UDP 21116
+#             reachable); not needed for the built-in remote view
 name: rustyrmm
 
 services:
@@ -47,8 +49,10 @@ services:
       RMM_RELEASE_SYNC_HOURS: ${RMM_RELEASE_SYNC_HOURS:-}
       RMM_RELEASE_AUTO_PROMOTE: ${RMM_RELEASE_AUTO_PROMOTE:-}
       RMM_WEBHOOK_ALLOW_PRIVATE: ${RMM_WEBHOOK_ALLOW_PRIVATE:-}
-      # Behind a Cloudflare Tunnel the console name isn't reachable for
-      # RustDesk's raw ports, so it can be given its own (DNS-only) name.
+      # Only used with the optional rustdesk profile. Behind a Cloudflare
+      # Tunnel the console name isn't reachable for RustDesk's raw ports, so it
+      # can be given its own (DNS-only) name. Without the profile no key is
+      # generated and RustDesk stays off.
       RMM_RUSTDESK_HOST: ${RMM_RUSTDESK_HOST:-${RMM_DOMAIN}}
       RMM_RUSTDESK_KEY_FILE: /rustdesk/id_ed25519.pub
     volumes:
@@ -82,8 +86,8 @@ services:
     environment:
       TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
 
-  # RustDesk ID server and relay. Agents are configured automatically with
-  # RMM_RUSTDESK_HOST and the generated public key.
+  # Optional RustDesk add-on: ID server and relay. Agents are configured
+  # automatically with RMM_RUSTDESK_HOST and the generated public key.
   hbbs:
     image: rustdesk/rustdesk-server:1
     profiles: [rustdesk]
