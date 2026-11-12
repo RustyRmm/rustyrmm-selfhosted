@@ -2,8 +2,9 @@
 
 Run your own [RustyRMM](https://rustyrmm.com) server with Docker Compose: the
 RustyRMM server and web console, a Postgres database, HTTPS through either
-Cloudflare Tunnel or Let's Encrypt, and an optional RustDesk server for remote
-desktop.
+Cloudflare Tunnel or Let's Encrypt. Remote desktop is built in (the **Screen**
+tab on each device), so nothing extra is needed for it; a RustDesk server is
+available as an optional add-on.
 
 ## Requirements
 
@@ -28,11 +29,14 @@ hostname (for example `rmm.example.com`) with the service
 **Let's Encrypt:** point the domain's DNS record at this host before the
 first start, and open ports 80 and 443.
 
-**Remote desktop (optional):** the `rustdesk` profile runs a RustDesk server
-next to RustyRMM. It needs TCP 21115–21117 and UDP 21116 open to this host.
-With Cloudflare Tunnel, give it its own DNS-only (grey cloud) record, for
-example `rustdesk.example.com`, because tunnelled names don't carry those
-ports.
+**Remote desktop:** built in. Sessions run through the console's normal
+HTTPS connection, so no extra ports are needed.
+
+**RustDesk add-on (optional):** only if your team prefers the RustDesk desktop
+client. The `rustdesk` profile runs a RustDesk server next to RustyRMM. It
+needs TCP 21115–21117 and UDP 21116 open to this host. With Cloudflare
+Tunnel, give it its own DNS-only (grey cloud) record, for example
+`rustdesk.example.com`, because tunnelled names don't carry those ports.
 
 ## 2. Get the files and configure
 
@@ -46,10 +50,10 @@ Edit `.env`:
 
 | Setting | What to put |
 |---|---|
-| `COMPOSE_PROFILES` | `tunnel,rustdesk` (Cloudflare Tunnel), `caddy,rustdesk` (Let's Encrypt), or leave out `rustdesk` if you don't want remote desktop |
+| `COMPOSE_PROFILES` | `tunnel` (Cloudflare Tunnel) or `caddy` (Let's Encrypt); add `,rustdesk` only for the optional RustDesk add-on |
 | `RMM_DOMAIN` | The console's name, e.g. `rmm.example.com` |
 | `CLOUDFLARE_TUNNEL_TOKEN` | Your tunnel token (Cloudflare Tunnel only) |
-| `RMM_RUSTDESK_HOST` | The RustDesk name, e.g. `rustdesk.example.com`; defaults to `RMM_DOMAIN` |
+| `RMM_RUSTDESK_HOST` | RustDesk add-on only: its name, e.g. `rustdesk.example.com`; defaults to `RMM_DOMAIN` |
 | `POSTGRES_PASSWORD` | A random password: `openssl rand -hex 24` |
 | `RMM_ADMIN_EMAIL` | Your email; it becomes the first administrator |
 | `RMM_ADMIN_PASSWORD` | Leave empty to have one generated (see step 4) |
@@ -90,8 +94,9 @@ Then:
 2. **Settings → Email (SMTP):** add your mail server and send a test. Alert
    emails, scheduled reports and password resets need it.
 3. **Settings → Agent updates → Sync now:** downloads the latest agent builds.
-4. **Settings → Remote desktop:** shows **Ready** when the `rustdesk` profile
-   is running.
+4. **Settings → Remote desktop:** turn on **Built-in remote view** and **Use
+   the Screen tab instead of RustDesk**. (With the `rustdesk` add-on, the
+   RustDesk section shows **Ready** once its server is running.)
 
 ## 5. Add your first device
 
@@ -124,6 +129,12 @@ at.
 To stay on one version, set `RMM_IMAGE=smugzombie/rustyrmm:0.9.1` (or another
 version) in `.env`.
 
+**Existing installs using RustDesk:** `git pull` won't touch your `.env`, so
+the `rustdesk` profile keeps running. To drop it, switch devices to the
+built-in remote view (step 4 above), remove `rustdesk` from
+`COMPOSE_PROFILES`, then `docker compose up -d --remove-orphans`. Keep the
+`rustdesk` volume if you might turn it back on.
+
 ## Backups
 
 Everything lives in Docker volumes. Back up the database regularly:
@@ -132,12 +143,13 @@ Everything lives in Docker volumes. Back up the database regularly:
 docker compose exec -T postgres pg_dump -U rmm rmm | gzip > rustyrmm-$(date +%F).sql.gz
 ```
 
-Also keep a copy of `.env`, and of the `rustdesk` volume if you use remote
-desktop: it holds the RustDesk server's key, and agents trust that key.
+Also keep a copy of `.env`, and of the `rustdesk` volume if you use the
+RustDesk add-on: it holds the RustDesk server's key, and agents trust that key.
 Treat backups as secrets.
 
 ## Documentation
 
 The full documentation is served by your own server at
 `https://rmm.example.com/docs/`. It covers configuration, Cloudflare Tunnel
-in detail, agent installation, alerts, reports and troubleshooting.
+in detail, agent installation, remote desktop, alerts, reports and
+troubleshooting.
