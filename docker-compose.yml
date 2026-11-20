@@ -56,6 +56,10 @@ services:
       RMM_RELEASE_SYNC_HOURS: ${RMM_RELEASE_SYNC_HOURS:-}
       RMM_RELEASE_AUTO_PROMOTE: ${RMM_RELEASE_AUTO_PROMOTE:-}
       RMM_WEBHOOK_ALLOW_PRIVATE: ${RMM_WEBHOOK_ALLOW_PRIVATE:-}
+      # Encrypts the backup S3 secret access key at rest. Set it before
+      # configuring an S3 backup target; keep it stable (losing it means
+      # re-entering the S3 secret).
+      RMM_SECRET_KEY: ${RMM_SECRET_KEY:-}
       # Only used with the optional rustdesk profile. Behind a Cloudflare
       # Tunnel the console name isn't reachable for RustDesk's raw ports, so it
       # can be given its own (DNS-only) name. Without the profile no key is

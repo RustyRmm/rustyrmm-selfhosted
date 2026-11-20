@@ -67,6 +67,7 @@ Edit `.env`:
 | `POSTGRES_PASSWORD` | A random password: `openssl rand -hex 24` |
 | `RMM_ADMIN_EMAIL` | Your email; it becomes the first administrator |
 | `RMM_ADMIN_PASSWORD` | Leave empty to have one generated (see step 4) |
+| `RMM_SECRET_KEY` | Only if you'll back up to S3 from **Settings → Backups**: `openssl rand -hex 32`, and keep it unchanged |
 
 Keep `RMM_UPDATE_PUBKEY` and `RMM_RELEASE_GITHUB_REPO` as they are. With
 them, the server downloads official signed agent builds and agents verify
@@ -129,6 +130,9 @@ curl -fsSL https://rmm.example.com/install.sh | sudo sh -s -- <CODE>
 The device appears under **Devices** within a few seconds.
 
 ## Use your own reverse proxy or tunnel
+
+<!-- Kept in sync with docs-site/docs/deployment/reverse-proxy.md in
+     github.com/RustyRmm/rustyrmm (the docs your server serves at /docs). -->
 
 If you already run a reverse proxy or tunnel, skip the bundled Caddy and
 Cloudflare Tunnel: set `COMPOSE_PROFILES=` (empty, or just `rustdesk`) and
