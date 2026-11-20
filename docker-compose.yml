@@ -12,6 +12,11 @@
 #   tunnel    Cloudflare Tunnel (no inbound ports; set CLOUDFLARE_TUNNEL_TOKEN)
 #   rustdesk  optional RustDesk add-on server (needs TCP 21115-21117 + UDP 21116
 #             reachable); not needed for the built-in remote view
+#
+# Already run a reverse proxy or tunnel? Leave caddy and tunnel out of
+# COMPOSE_PROFILES and either publish the server's port with expose.yml
+# (COMPOSE_FILE=docker-compose.yml:expose.yml) or attach your proxy container
+# to the rustyrmm_default network and target http://rustyrmm:8080.
 name: rustyrmm
 
 services:
@@ -31,7 +36,9 @@ services:
 
   rustyrmm:
     # Published image; set RMM_IMAGE in .env to pin a version, e.g.
-    # smugzombie/rustyrmm:0.9.1.
+    # smugzombie/rustyrmm:0.27.0.
+    # Serves plain HTTP on 8080 inside the compose network; nothing is
+    # published on the host unless expose.yml is used.
     image: ${RMM_IMAGE:-smugzombie/rustyrmm:latest}
     restart: unless-stopped
     depends_on:
