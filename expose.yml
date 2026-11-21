@@ -1,0 +1,15 @@
+# Publishes the RustyRMM server's plain-HTTP port on this host, for a reverse
+# proxy or tunnel you already run (see "Use your own reverse proxy or tunnel"
+# in README.md). Enable it in .env:
+#
+#   COMPOSE_FILE=docker-compose.yml:expose.yml
+#
+# RMM_HTTP_BIND  address to listen on (default 127.0.0.1: only a proxy on this
+#                host can reach it). Use this host's LAN address when the proxy
+#                runs elsewhere, and firewall the port so only the proxy can
+#                connect.
+# RMM_HTTP_PORT  port on this host (default 8080).
+services:
+  rustyrmm:
+    ports:
+      - "${RMM_HTTP_BIND:-127.0.0.1}:${RMM_HTTP_PORT:-8080}:8080"
