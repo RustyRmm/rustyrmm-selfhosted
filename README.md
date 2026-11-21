@@ -71,7 +71,9 @@ Edit `.env`:
 
 Keep `RMM_UPDATE_PUBKEY` and `RMM_RELEASE_GITHUB_REPO` as they are. With
 them, the server downloads official signed agent builds and agents verify
-every update against that key.
+every update against that key. The same key checks the signed vulnerability
+feed (the **Vulnerabilities** page); `RMM_VULN_FEED_URL` points it at a mirror,
+or `off` turns vulnerability monitoring off.
 
 ## 3. Start it
 
